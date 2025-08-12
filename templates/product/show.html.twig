@@ -43,6 +43,22 @@
                     </div>
                 </div>
             </div>
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Code Promo</h5>
+                    {{ form_start(form) }}
+                    {{ form_row(form.code, {'label': 'Entrez votre code promo :'}) }}
+
+                    <button type="submit" class="btn btn-primary">Appliquer</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {% if discountedPrice is defined %}
+                <div class="alert alert-info mt-3">
+                     Prix remisé : {{ discountedPrice|number_format(2, '.', ' ') }} €
+                </div>
+            {% endif %}
 
             <div class="mt-3">
                 <a href="{{ path('product_edit_stock', {id: product.id}) }}" class="btn btn-warning">
