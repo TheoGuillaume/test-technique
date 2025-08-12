@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
+use League\Csv\Writer;
 
 class ProductExporter
 {
@@ -13,144 +15,128 @@ class ProductExporter
         $this->entityManager = $entityManager;
     }
 
-    public function exportToCsv($filename = null)
+    public function exportToCsvResponse(): array
     {
-        // Si pas de nom de fichier, on en génère un
-        if (!$filename) {
-            $filename = 'products_export_' . date('Y_m_d_H_i_s') . '.csv';
-        }
+        $products = $this->entityManager->getRepository(Product::class)->findAll();
+        $csv = Writer::createFromString('');
+        $csv->setDelimiter(';');
+        $csv->insertOne(['ID', 'Nom', 'Description', 'Prix', 'Stock', 'Statut Stock']);
 
-        // On récupère tous les produits
-        $products = $this->entityManager->getRepository('App\Entity\Product')->findAll();
+        $stats = $this->calculateExportStats($products, $csv);
 
-        // On vérifie que le dossier existe
-        $exportDir = __DIR__ . '/../../public/exports/';
-        if (!is_dir($exportDir)) {
-            mkdir($exportDir, 0755, true);
-        }
+        return [
+            'csv' => $csv->toString(),
+            'stats_text' => $this->generateStatsText($stats), // Optionnel, si tu veux garder le texte
+            'filename' => 'products_export_' . date('Y_m_d_H_i_s') . '.csv',
+            'total_products' => $stats['totalProducts'],
+            'total_value' => $stats['totalValue'],
+            'out_of_stock' => $stats['outOfStock'],
+            'low_stock' => $stats['lowStock'],
+        ];
+    }
 
-        $filepath = $exportDir . $filename;
 
-        // On ouvre le fichier en écriture
-        $file = fopen($filepath, 'w');
-
-        if (!$file) {
-            throw new \Exception('Impossible de créer le fichier ' . $filepath);
-        }
-
-        // On écrit l'en-tête
-        fputcsv($file, ['ID', 'Nom', 'Description', 'Prix', 'Stock', 'Statut Stock']);
-
-        // On traite chaque produit
-        foreach ($products as $product) {
-            // On détermine le statut du stock
-            $stockStatus = '';
-            if ($product->getStock() == 0) {
-                $stockStatus = 'Rupture';
-            } elseif ($product->getStock() <= 5) {
-                $stockStatus = 'Stock faible';
-            } elseif ($product->getStock() <= 10) {
-                $stockStatus = 'Stock moyen';
-            } else {
-                $stockStatus = 'Stock élevé';
-            }
-
-            // On formate le prix
-            $formattedPrice = number_format($product->getPrice(), 2, ',', ' ') . ' €';
-
-            // On traite la description (peut être null)
-            $description = $product->getDescription();
-            if ($description) {
-                // On nettoie la description
-                $description = str_replace(["\n", "\r", "\t"], ' ', $description);
-                $description = trim($description);
-                // On limite à 100 caractères
-                if (strlen($description) > 100) {
-                    $description = substr($description, 0, 97) . '...';
-                }
-            } else {
-                $description = 'Aucune description';
-            }
-
-            // On écrit la ligne
-            $row = [
-                $product->getId(),
-                $product->getName(),
-                $description,
-                $formattedPrice,
-                $product->getStock(),
-                $stockStatus
-            ];
-
-            fputcsv($file, $row, ';');
-        }
-
-        // On ferme le fichier
-        fclose($file);
-
-        // On calcule quelques statistiques
-        $totalProducts = count($products);
-        $totalValue = 0;
+    /**
+     * Calcule les statistiques d'export à partir de la liste des produits.
+     *
+     * @param Product[] $products
+     * @param Writer $csv
+     * @return array{
+     *   totalProducts: int,
+     *   totalValue: float,
+     *   outOfStock: int,
+     *   lowStock: int
+     * }
+     */
+    private function calculateExportStats(array $products, Writer $csv): array
+    {
+        $totalProducts = 0;
+        $totalValue = 0.0;
         $outOfStock = 0;
         $lowStock = 0;
 
         foreach ($products as $product) {
+            $row = $this->formatProductRow($product);
+            $csv->insertOne($row);
+
             $totalValue += $product->getPrice() * $product->getStock();
-            if ($product->getStock() == 0) {
+            $totalProducts++;
+
+            if ($product->getStock() === 0) {
                 $outOfStock++;
             } elseif ($product->getStock() <= 5) {
                 $lowStock++;
             }
         }
 
-        // On crée un fichier de statistiques
-        $statsFile = $exportDir . 'stats_' . $filename;
-        $stats = fopen($statsFile, 'w');
-
-        fwrite($stats, "=== STATISTIQUES EXPORT PRODUITS ===\n");
-        fwrite($stats, "Date d'export: " . date('d/m/Y H:i:s') . "\n");
-        fwrite($stats, "Nombre total de produits: " . $totalProducts . "\n");
-        fwrite($stats, "Valeur totale du stock: " . number_format($totalValue, 2, ',', ' ') . " €\n");
-        fwrite($stats, "Produits en rupture: " . $outOfStock . "\n");
-        fwrite($stats, "Produits en stock faible: " . $lowStock . "\n");
-        fwrite($stats, "Fichier CSV généré: " . $filename . "\n");
-
-        fclose($stats);
-
-        // On retourne les informations
         return [
-            'success' => true,
-            'filename' => $filename,
-            'filepath' => $filepath,
-            'stats_file' => $statsFile,
-            'total_products' => $totalProducts,
-            'total_value' => $totalValue,
-            'out_of_stock' => $outOfStock,
-            'low_stock' => $lowStock,
-            'export_time' => date('Y-m-d H:i:s')
+            'totalProducts' => $totalProducts,
+            'totalValue' => $totalValue,
+            'outOfStock' => $outOfStock,
+            'lowStock' => $lowStock,
         ];
     }
 
-    public function getExportsList()
+    /**
+     * Formate une ligne de produit pour le CSV.
+     */
+    private function formatProductRow(Product $product): array
     {
-        $exportDir = __DIR__ . '/../../public/exports/';
-        $files = [];
+        $description = $product->getDescription() ?? 'Aucune description';
+        $description = $this->cleanDescription($description);
 
-        if (is_dir($exportDir)) {
-            $handle = opendir($exportDir);
-            while (($file = readdir($handle)) !== false) {
-                if ($file != '.' && $file != '..' && pathinfo($file, PATHINFO_EXTENSION) == 'csv') {
-                    $filepath = $exportDir . $file;
-                    $files[] = [
-                        'name' => $file,
-                        'size' => filesize($filepath),
-                        'date' => date('d/m/Y H:i:s', filemtime($filepath))
-                    ];
-                }
-            }
-            closedir($handle);
+        return [
+            $product->getId(),
+            $product->getName(),
+            $description,
+            number_format($product->getPrice(), 2, ',', ' ') . ' €',
+            $product->getStock(),
+            $this->getStockStatus($product->getStock()),
+        ];
+    }
+
+    /**
+     * Nettoie et tronque la description.
+     */
+    private function cleanDescription(string $description): string
+    {
+        $description = str_replace(["\n", "\r", "\t"], ' ', $description);
+        $description = trim($description);
+        return strlen($description) > 100 ? substr($description, 0, 97) . '...' : $description;
+    }
+
+    /**
+     * Détermine le statut du stock.
+     */
+    private function getStockStatus(int $stock): string
+    {
+        if ($stock === 0) {
+            return 'Rupture';
+        } elseif ($stock <= 5) {
+            return 'Stock faible';
+        } elseif ($stock <= 10) {
+            return 'Stock moyen';
         }
+        return 'Stock élevé';
+    }
 
-        return $files;
+    /**
+     * Génère le texte des statistiques d'export.
+     */
+   private function generateStatsText(array $stats): string
+    {
+        return sprintf(
+            "=== STATISTIQUES EXPORT PRODUITS ===\n" .
+            "Date d'export: %s\n" .
+            "Nombre total de produits: %d\n" .
+            "Valeur totale du stock: %s €\n" .
+            "Produits en rupture: %d\n" .
+            "Produits en stock faible: %d\n",
+            date('d/m/Y H:i:s'),
+            $stats['totalProducts'],
+            number_format($stats['totalValue'], 2, ',', ' '),
+            $stats['outOfStock'],
+            $stats['lowStock']
+        );
     }
 }
