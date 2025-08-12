@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le stock - {{ product.name }}{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1>Modifier le stock</h1>
+            <h2 class="h4 text-muted">{{ product.name }}</h2>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Stock actuel:</strong>
+                        <span class="badge {% if product.stock > 10 %}bg-success{% elseif product.stock > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                            {{ product.stock }}
+                        </span>
+                    </div>
+
+                    {{ form_start(form) }}
+                        <div class="mb-3">
+                            {{ form_label(form.stock) }}
+                            {{ form_widget(form.stock) }}
+                            {{ form_help(form.stock) }}
+                            {{ form_errors(form.stock) }}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ path('product_show', {id: product.id}) }}" class="btn btn-secondary me-md-2">
+                                Annuler
+                            </a>
+                            {{ form_widget(form.submit) }}
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

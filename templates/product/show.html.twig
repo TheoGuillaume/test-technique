@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ product.name }}</h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Informations du produit</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>ID:</strong></div>
+                        <div class="col-sm-9">{{ product.id }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Nom:</strong></div>
+                        <div class="col-sm-9">{{ product.name }}</div>
+                    </div>
+
+                    {% if product.description %}
+                        <div class="row mb-3">
+                            <div class="col-sm-3"><strong>Description:</strong></div>
+                            <div class="col-sm-9">{{ product.description }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Prix:</strong></div>
+                        <div class="col-sm-9">{{ product.price }}€</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Stock:</strong></div>
+                        <div class="col-sm-9">
+                            <span class="badge {% if product.stock > 10 %}bg-success{% elseif product.stock > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ product.stock }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="{{ path('product_edit_stock', {id: product.id}) }}" class="btn btn-warning">
+                    Modifier le stock
+                </a>
+                <a href="{{ path('product_list') }}" class="btn btn-secondary">
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

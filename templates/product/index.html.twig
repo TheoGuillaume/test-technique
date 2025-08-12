@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des produits{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Liste des produits</h1>
+        <a href="{{ path('product_export') }}" class="btn btn-success">
+            <i class="bi bi-download"></i> Exporter en CSV
+        </a>
+    </div>
+
+    {% if products is empty %}
+        <div class="alert alert-info">
+            Aucun produit trouvé.
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prix</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ product.id }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.price }}€</td>
+                            <td>{{ product.stock }}</td>
+                            <td>
+                                <a href="{{ path('product_show', {id: product.id}) }}" class="btn btn-primary btn-sm">
+                                    Voir détail
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}
