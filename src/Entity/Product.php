@@ -28,6 +28,8 @@ class Product
     private ?float $price = null;
 
     #[ORM\Column(type: Types::INTEGER)]
+    #[Assert\Type(type: 'integer', message: 'Le stock doit être un entier.')]
+    #[Assert\PositiveOrZero(message: 'Le stock ne peut pas être négatif.')]
     private ?int $stock = null;
 
     /**

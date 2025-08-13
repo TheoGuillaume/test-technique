@@ -22,7 +22,9 @@
                             {{ form_label(form.stock) }}
                             {{ form_widget(form.stock) }}
                             {{ form_help(form.stock) }}
-                            {{ form_errors(form.stock) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.stock) }}
+                            </div>
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
