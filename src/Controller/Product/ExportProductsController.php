@@ -2,9 +2,11 @@
 
 namespace App\Controller\Product;
 
+use App\Message\ExportProductsMessage;
 use App\Service\ProductExporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ExportProductsController extends AbstractController
@@ -41,5 +43,16 @@ class ExportProductsController extends AbstractController
             $this->addFlash('error', 'Erreur lors de l\'export : ' . $e->getMessage());
             return $this->redirectToRoute('product_list');
         }
+    }
+
+    #[Route('/products/export_email', name: 'products_export_email')]
+    public function export(MessageBusInterface $bus): Response
+    {
+        // Remplace par l'email de l'utilisateur connecté ou simule-le
+        $userEmail = 'test@example.com';
+
+        $bus->dispatch(new ExportProductsMessage($userEmail));
+
+        return new Response('L’export sera envoyé à votre adresse email sous peu');
     }
 }
