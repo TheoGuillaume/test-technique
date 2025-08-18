@@ -1,0 +1,40 @@
+# Répertoires de cache et logs
+/var/
+/var/*
+
+# Vendor
+/vendor/
+
+# Fichiers d'environnement locaux
+.env.local
+.env.*.local
+.env.local.php
+
+# Fichiers de configuration spécifiques à la machine
+.phpunit.result.cache
+
+# IDE / éditeur
+/.idea/
+/.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Assets compilés
+/public/bundles/
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+
+# Cache de tests
+/.phpunit.cache
+
+# Autres caches possibles
+/.symfony
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
