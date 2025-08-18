@@ -44,7 +44,7 @@
                 </div>
             </div>
            
-            {{ component('PromoCodeComponent', { product: product }) }}
+            {{ component('PromoCodeComponent', { productId: product.id }) }}
 
             <div class="mt-3">
                 <a href="{{ path('product_edit_stock', {id: product.id}) }}" class="btn btn-warning">

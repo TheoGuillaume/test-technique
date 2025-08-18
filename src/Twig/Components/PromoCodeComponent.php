@@ -17,7 +17,7 @@ class PromoCodeComponent extends AbstractController
     use DefaultActionTrait;
 
     #[LiveProp]
-    public Product $product;
+    public int $productId;
 
     #[LiveProp(writable: true)]
     public ?string $code = null;
@@ -32,9 +32,21 @@ class PromoCodeComponent extends AbstractController
     {
     }
 
+    private function getProduct(): ?Product
+    {
+        return $this->em->getRepository(Product::class)->find($this->productId);
+    }
+
     #[LiveAction]
     public function updateCode(): void
     {
+        $product = $this->getProduct();
+        if (!$product) {
+            $this->errorMessage = 'Produit introuvable.';
+            $this->discountedPrice = null;
+            return;
+        }
+
         if (empty($this->code)) {
             $this->discountedPrice = null;
             $this->errorMessage = null;
@@ -43,7 +55,7 @@ class PromoCodeComponent extends AbstractController
 
         $promoCode = $this->em->getRepository(PromoCode::class)->findOneBy([
             'code' => $this->code,
-            'product' => $this->product
+            'product' => $product
         ]);
 
         if (!$promoCode) {
@@ -59,7 +71,7 @@ class PromoCodeComponent extends AbstractController
         }
 
         $this->errorMessage = null;
-        $reductionAmount = $this->product->getPrice() * ($promoCode->getPourcentage() / 100);
-        $this->discountedPrice = $this->product->getPrice() - $reductionAmount;
+        $reductionAmount = $product->getPrice() * ($promoCode->getPourcentage() / 100);
+        $this->discountedPrice = $product->getPrice() - $reductionAmount;
     }
 }
