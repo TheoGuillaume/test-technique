@@ -1,0 +1,12 @@
+{
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-2mHNCgc.js",
+    "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-V1GtHuK.js",
+    "@symfony\/ux-live-component\/live.min.css": "\/assets\/@symfony\/ux-live-component\/live.min-FOtfHpc.css",
+    "@symfony\/ux-live-component\/live_controller.js": "\/assets\/@symfony\/ux-live-component\/live_controller-jU_9mDq.js",
+    "app.js": "\/assets\/app-AMxuy1d.js",
+    "bootstrap.js": "\/assets\/bootstrap-LEv_lXd.js",
+    "controllers\/csrf_protection_controller.js": "\/assets\/controllers\/csrf_protection_controller-qtTFcyL.js",
+    "controllers\/hello_controller.js": "\/assets\/controllers\/hello_controller-VYgvytJ.js",
+    "styles\/app.css": "\/assets\/styles\/app-cT2YKNc.css",
+    "vendor\/@hotwired\/stimulus\/stimulus.index.js": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-S4zNcea.js"
+}
