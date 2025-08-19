@@ -38,3 +38,6 @@ Thumbs.db
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/

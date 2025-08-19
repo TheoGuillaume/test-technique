@@ -1,0 +1,24 @@
+<div {{ attributes }}>
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Code Promo</h5>
+            <input type="text"
+                class="form-control"
+                placeholder="Entrez votre code promo"
+                value="{{ this.code }}"
+                data-model="code"
+                data-action="input->live#action"
+                data-live-action-param="updateCode"
+                data-live-debounce="500ms">
+            {% if errorMessage %}
+                <div class="alert alert-danger mt-3">{{ errorMessage }}</div>
+            {% endif %}
+            {% if discountedPrice %}
+                <div class="alert alert-success mt-3">
+                    Nouveau prix : {{ discountedPrice|number_format(2, ',', ' ') }} €
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
